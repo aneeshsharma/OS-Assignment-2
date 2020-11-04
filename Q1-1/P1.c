@@ -15,17 +15,28 @@ int main() {
 		mkfifo(pipe_name, 0666);
 
 		int temperatures[NO_OF_LOCATIONS];
-		fd = open(pipe_name, O_WRONLY);
-				
+						
 		char write_buffer[1024];
 		while(1) {
+			/* read temperatures and sent to P2 */
+			// open a named pipe to write data	
+			fd = open(pipe_name, O_WRONLY);
+			
+			printf("Please input temperatures for the %d locations -\n", NO_OF_LOCATIONS);
 			for (int i = 0; i < NO_OF_LOCATIONS; i++) {
-				scanf("%d", &temperatures[i]);
+				printf("L%d - ", i + 1);
+				scanf("%d%*c", &temperatures[i]);
 			}
+			
+			// write temperatures to a string seperated by spaces
 			char* buffer = write_buffer;
 			for (int i = 0; i < NO_OF_LOCATIONS; i++)
 				buffer += (int) sprintf(buffer, "%d ", temperatures[i]);
-			sprintf(buffer, "E\n");
+			
+			// write the generated string to the pipe
 			write(fd, write_buffer, strlen(write_buffer) + 1);
+			close(fd);
+
+
 		}
 }

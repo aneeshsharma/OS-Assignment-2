@@ -8,7 +8,7 @@ all: $(OBJS)
 	@echo Compiled successfully
 
 .c.o:
-	$(CC) -c $< -o $@
+	$(CC) $< -lm -o $@
 
 clean: 
 	rm *.o *.out
