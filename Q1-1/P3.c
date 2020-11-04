@@ -89,5 +89,16 @@ int main() {
 				}
 				printf("L%d - Cat%d\n", i + 1, categories[i]);
 			}
+
+			fd = open(pipe_name_write, O_WRONLY);
+
+			char* buffer = write_buffer;
+			for (int i = 0; i < NO_OF_LOCATIONS; i++) {
+				buffer += sprintf(buffer, "%d ", categories[i]);
+			}
+
+			write(fd, write_buffer, strlen(write_buffer) + 1);
+
+			close(fd);
 		}
 }
