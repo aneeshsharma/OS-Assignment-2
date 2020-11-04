@@ -12,14 +12,17 @@
 int nextInt(char* string, int* index, int* out) {
 	int len = strlen(string);
 	int num = 0;
+	int neg = 1;
 	while ((*index < len) && (string[*index])) {
 		char c = string[*index];
 		*index += 1;
 		if (isdigit(c)) {
 			num *= 10;
 			num += (int) c - '0';
+		} else if (c == '-') {
+			neg = -1;
 		} else if (c == ' ' || c == '\n' || c == '\r') {
-			*out = num;
+			*out = neg * num;
 			return 0;
 		} else {
 			return -1;
