@@ -36,7 +36,5 @@ int main() {
 			// write the generated string to the pipe
 			write(fd, write_buffer, strlen(write_buffer) + 1);
 			close(fd);
-
-
 		}
 }

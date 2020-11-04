@@ -35,8 +35,8 @@ int debug(char* log) {
 int main() {
 		int fd;
 
-		char* pipe_name_read = "/tmp/temp-control-12";
-		char* pipe_name_write = "/tmp/temp-control-23";
+		char* pipe_name_read = "/tmp/temp-control-23";
+		char* pipe_name_write = "/tmp/temp-control-31";
 
 		mkfifo(pipe_name_read, 0666);
 		mkfifo(pipe_name_write, 0666);
@@ -50,50 +50,44 @@ int main() {
 			debug("New pipe opened\n");
 
 			read(fd, read_buffer, 1024);
-
 			int index = 0;
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				if (nextInt(read_buffer, &index, &temperatures[i]) < 0)
-					printf("Error reading data");
+			float avg, D;
 
+			sscanf(read_buffer, "%f %f", &avg, &D);
+			
 			printf("-----------------\n");
 			printf("Received temperature data\n");
+
+			printf("Avg - %f\nDeviation - %f\n", avg, D);
 			
+			while(read_buffer[index] != 'D')
+					index++;
+			index++;
+
+			for (int i = 0; i < NO_OF_LOCATIONS; i++)
+				if (nextInt(read_buffer, &index, &temperatures[i]) < 0)
+					printf("Error reading data at %d\n", index);
+
 			for (int i = 0; i < NO_OF_LOCATIONS; i++)
 				printf("L%d - %d Celsius\n", (i + 1), temperatures[i]);
 
-			// calculate avg and standard deviation
-			float D = 0;
-			float avg = 0;
-
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				avg += temperatures[i];
-			avg /= NO_OF_LOCATIONS;
-
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				D += pow(temperatures[i] - avg, 2);
-			D = sqrt(D / (NO_OF_LOCATIONS - 1));
-
-			printf("Avg - %f\nStandard deviation - %f\n", avg, D);
-
 			close(fd);
 
-			debug("Pipe closed\n");
+			int categories[NO_OF_LOCATIONS];
 
-			fd = open(pipe_name_write, O_WRONLY);
-
-			debug("Opened write pipe\n");
-
-			char* buffer = write_buffer;
-			buffer += sprintf(buffer, "%f %fD", avg, D);
 			for (int i = 0; i < NO_OF_LOCATIONS; i++) {
-				buffer +=  sprintf(buffer, "%d ", temperatures[i]);
+				if (temperatures[i] < avg - D) {
+					categories[i] = 4;
+				} else if (temperatures[i] < avg) {
+					categories[i] = 3;
+				} else if (temperatures[i] > avg + D) {
+					categories[i] = 1;
+				} else if (temperatures[i] > avg) {
+					categories[i] = 2;
+				} else {
+					categories[i] = 0;
+				}
+				printf("L%d - Cat%d\n", i + 1, categories[i]);
 			}
-
-			printf("%s\n", write_buffer);
-
-			write(fd, write_buffer, strlen(write_buffer) + 1);
-
-			close(fd);
 		}
 }
