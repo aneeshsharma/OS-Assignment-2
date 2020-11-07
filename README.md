@@ -49,7 +49,7 @@ OR
 ```
 $ ./process.o
 ```
-## Shared Memory Communicationi
+## Shared Memory Communication
 The directory Q2 contains files relevant to shared memory communication. In order to compile the code, change to the directory `Q2` and run `make` -
 ```
 $ cd Q2
