@@ -1,4 +1,4 @@
-$(CC) = gcc
+CC = gcc
 all:
 	$(CC) process.c -lm -o process.o
 

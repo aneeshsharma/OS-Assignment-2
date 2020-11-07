@@ -47,56 +47,54 @@ int main() {
 		int temperatures[NO_OF_LOCATIONS];
 						
 		char read_buffer[1024], write_buffer[1024];
-		while(1) {
-			fd = open(pipe_name_read, O_RDONLY);
+		
+		fd = open(pipe_name_read, O_RDONLY);
 			
-			debug("New pipe opened\n");
+		debug("New pipe opened\n");
 
-			read(fd, read_buffer, 1024);
+		read(fd, read_buffer, 1024);
 
-			int index = 0;
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				if (nextInt(read_buffer, &index, &temperatures[i]) < 0)
-					printf("Error reading data");
+		int index = 0;
+		for (int i = 0; i < NO_OF_LOCATIONS; i++)
+			if (nextInt(read_buffer, &index, &temperatures[i]) < 0)
+				printf("Error reading data");
 
-			printf("-----------------\n");
-			printf("Received temperature data\n");
+		printf("-----------------\n");
+		printf("Received temperature data\n");
 			
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				printf("L%d - %d Celsius\n", (i + 1), temperatures[i]);
+		for (int i = 0; i < NO_OF_LOCATIONS; i++)
+			printf("L%d - %d Celsius\n", (i + 1), temperatures[i]);
 
-			// calculate avg and standard deviation
-			float D = 0;
-			float avg = 0;
+		// calculate avg and standard deviation
+		float D = 0;
+		float avg = 0;
 
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				avg += temperatures[i];
-			avg /= NO_OF_LOCATIONS;
+		for (int i = 0; i < NO_OF_LOCATIONS; i++)
+			avg += temperatures[i];
+		avg /= NO_OF_LOCATIONS;
 
-			for (int i = 0; i < NO_OF_LOCATIONS; i++)
-				D += pow(temperatures[i] - avg, 2);
-			D = sqrt(D / (NO_OF_LOCATIONS - 1));
+		for (int i = 0; i < NO_OF_LOCATIONS; i++)
+			D += pow(temperatures[i] - avg, 2);
+		D = sqrt(D / (NO_OF_LOCATIONS - 1));
 
-			printf("Avg - %f\nStandard deviation - %f\n", avg, D);
+		printf("Avg - %f\nStandard deviation - %f\n", avg, D);
+		close(fd);
 
-			close(fd);
+		debug("Pipe closed\n");
 
-			debug("Pipe closed\n");
+		fd = open(pipe_name_write, O_WRONLY);
 
-			fd = open(pipe_name_write, O_WRONLY);
+		debug("Opened write pipe\n");
 
-			debug("Opened write pipe\n");
-
-			char* buffer = write_buffer;
-			buffer += sprintf(buffer, "%f %fD", avg, D);
-			for (int i = 0; i < NO_OF_LOCATIONS; i++) {
-				buffer +=  sprintf(buffer, "%d ", temperatures[i]);
-			}
-
-			printf("%s\n", write_buffer);
-
-			write(fd, write_buffer, strlen(write_buffer) + 1);
-
-			close(fd);
+		char* buffer = write_buffer;
+		buffer += sprintf(buffer, "%f %fD", avg, D);
+		for (int i = 0; i < NO_OF_LOCATIONS; i++) {
+			buffer +=  sprintf(buffer, "%d ", temperatures[i]);
 		}
+
+		printf("%s\n", write_buffer);
+
+		write(fd, write_buffer, strlen(write_buffer) + 1);
+
+		close(fd);
 }
