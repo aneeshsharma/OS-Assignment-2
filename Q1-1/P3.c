@@ -77,7 +77,8 @@ int main() {
 			close(fd);
 
 			int categories[NO_OF_LOCATIONS];
-
+			
+			printf("Determined caregories -\n");
 			for (int i = 0; i < NO_OF_LOCATIONS; i++) {
 				if (temperatures[i] < avg - D) {
 					categories[i] = 4;
